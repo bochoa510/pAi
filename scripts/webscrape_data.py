@@ -12,7 +12,6 @@ response = requests.get(url, headers=headers)
 response.raise_for_status()
 
 soup = BeautifulSoup(response.text, 'html.parser')
-
 ul = soup.select_one('div.container > div.main > p > p > ul')
 
 if not ul:
@@ -30,7 +29,7 @@ for li in ul.find_all('li'):
     description = full_text.replace(dtc_code, '').strip(' -–—:')
     data[dtc_code] = description
 
-with open('p00_dtc_codes.json', 'w') as f:
+with open('../data/p00_dtc_codes.json', 'w') as f:
     json.dump(data, f, indent=4)
 
 print("Done! JSON file created with DTC codes and descriptions.")
