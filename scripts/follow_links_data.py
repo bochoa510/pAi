@@ -6,8 +6,12 @@ import json
 BASE_URL = 'https://www.obd-codes.com'
 SUMMARY_URL = f'{BASE_URL}/p00-codes'
 
+
 OUTPUT_DIR = '../data'
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+HTML_DIR = os.path.join(OUTPUT_DIR, 'html')
+JSON_DIR = os.path.join(OUTPUT_DIR, 'json')
+os.makedirs(HTML_DIR, exist_ok=True)
+os.makedirs(JSON_DIR, exist_ok=True)
 
 def fetch_first_link():
     print('Fetching summary page...')
@@ -20,18 +24,18 @@ def fetch_first_link():
     if not first_link:
         raise ValueError("No DTC links found on summary page.")
 
-    code = first_link.text.strip().lower()
+    code = first_link.text[:5]
+    print(code)
+   
     href = soup.select_one('div.container > div.main > p > p > ul > li > a')['href']
-    #full_url = BASE_URL + href
-    full_url = BASE_URL + "/p0005"  # For testing, replace with actual href if needed
+    full_url = BASE_URL + href
     return code, full_url
 
 def fetch_and_save_page(url, code):
     resp = requests.get(url)
     resp.raise_for_status()
 
-    safe_code = "".join(c if c.isalnum() or c in "-_." else "_" for c in code)
-    html_path = os.path.join(OUTPUT_DIR, f"{safe_code}.html")
+    html_path = os.path.join(OUTPUT_DIR, f"{code}.html")
     with open(html_path, 'w', encoding='utf-8') as f:
         f.write(resp.text)
 
@@ -64,7 +68,6 @@ def extract_data_from_html(filepath):
     return data
 
 def save_json(data, code):
-    code="".join(c if c.isalnum() or c in "-_." else "_" for c in code)
     json_path = os.path.join(OUTPUT_DIR, f"{code}.json")
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
